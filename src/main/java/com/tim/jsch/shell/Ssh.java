@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 public class Ssh {
@@ -63,7 +62,6 @@ public class Ssh {
             try {
                 session.connect();
             } catch (JSchException e) {
-                // TODO Auto-generated catch block
                 System.out.println("Session connect failed");
                 e.printStackTrace();
             }
@@ -74,7 +72,6 @@ public class Ssh {
             try {
                 channel.connect(timeout);
             } catch (JSchException e) {
-                // TODO Auto-generated catch block
                 System.out.println("Channel connect failed");
                 e.printStackTrace();
             }

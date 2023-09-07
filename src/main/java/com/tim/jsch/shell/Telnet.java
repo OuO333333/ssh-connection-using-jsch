@@ -1,6 +1,5 @@
 package com.tim.jsch.shell;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,10 +24,8 @@ public class Telnet {
             telnet.connect(ip, port);
             System.out.println("--- telnet connect successfully ---");
         } catch (SocketException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         in = telnet.getInputStream();
@@ -70,8 +67,6 @@ public class Telnet {
             System.out.println("sendCommand: " + command);
             write(command);
             // if (command.compareTo("\r") == 0)
-            List<String> s = new ArrayList<>();
-            ;
             // s.add("aaaaa");
             return readChar();
             // return readUntil(s);
@@ -103,12 +98,10 @@ public class Telnet {
                         try {
                             Thread.sleep(1);
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 if (count == timeOut - 1) {
@@ -144,12 +137,10 @@ public class Telnet {
                         try {
                             Thread.sleep(1);
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 if (count == timeOut - 1) {
