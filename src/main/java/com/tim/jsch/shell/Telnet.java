@@ -66,10 +66,7 @@ public class Telnet {
         try {
             System.out.println("sendCommand: " + command);
             write(command);
-            // if (command.compareTo("\r") == 0)
-            // s.add("aaaaa");
             return readChar();
-            // return readUntil(s);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,8 +120,12 @@ public class Telnet {
         StringBuffer sb = new StringBuffer();
         int timeOut = 40;
 
+        // while loop for available input stream several times
         while (true) {
-            // char ch = 'a';
+            // for loop for a available input stream
+            // break from for loop if current input stream is not available
+            // sleep 1 ms if input stream is not available
+            // return if input stream idle for 40 ms
             for (int count = 0; count < timeOut; count++) {
                 try {
                     if (in.available() > 0) {
