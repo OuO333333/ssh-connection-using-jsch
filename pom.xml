@@ -35,8 +35,21 @@
 		<dependency>
    			<groupId>com.jcraft</groupId>
    			<artifactId>jsch</artifactId>
-   		<version>0.1.55</version>
-</dependency>
+   			<version>0.1.55</version>
+		</dependency>
+
+		<dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.22</version>
+        </dependency>
+		<!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
+		<dependency>
+    		<groupId>commons-net</groupId>
+    		<artifactId>commons-net</artifactId>
+    		<version>3.8.0</version>
+		</dependency>
+<!-- Thanks for using https://jar-download.com -->
 	</dependencies>
 
 	<build>
