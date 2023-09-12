@@ -19,7 +19,7 @@ public class Telnet {
     private static final List<String> passwordPrompt = Arrays.asList("password:", "Password:");
     private static final List<String> commandPrompt = Arrays.asList("#", ">", "$", "aaaaa");
 
-    public Telnet(String ip, int port, String user, String password) {
+    public Telnet(String ip, int port, String user, String password, String telnetId) {
         try {
             telnet.connect(ip, port);
             System.out.println("--- telnet connect successfully ---");
@@ -75,7 +75,6 @@ public class Telnet {
 
     private String readUntil(List<String> pattern) {
         StringBuffer sb = new StringBuffer();
-        int timeOut = 40;
         List<Character> lastChar = new ArrayList<>();
         for (int i = 0; i < pattern.size(); i++) {
             lastChar.add(i, pattern.get(i).charAt(pattern.get(i).length() - 1));
@@ -83,13 +82,12 @@ public class Telnet {
 
         while (true) {
             char ch = 'a';
-            for (int count = 0; count < timeOut; count++) {
+            for (int idleTime = 0; idleTime < 100000000; idleTime++) {
                 try {
                     if (in.available() > 0) {
-                        while (in.available() > 0) {
                             ch = (char) in.read();
                             sb.append(ch);
-                        }
+                            System.out.println("ch: " + ch);
                         break;
                     } else {
                         try {
@@ -101,9 +99,9 @@ public class Telnet {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if (count == timeOut - 1) {
-                    return sb.toString();
-                }
+                // if (idleTime == timeOut - 1) {
+                //     return sb.toString();
+                // }
             }
             for (int i = 0; i < pattern.size(); i++) {
                 if (ch == lastChar.get(i)) {
@@ -118,6 +116,8 @@ public class Telnet {
 
     private String readChar() {
         StringBuffer sb = new StringBuffer();
+
+        // ms
         int timeOut = 40;
 
         // while loop for available input stream several times
@@ -126,7 +126,7 @@ public class Telnet {
             // break from for loop if current input stream is not available
             // sleep 1 ms if input stream is not available
             // return if input stream idle for 40 ms
-            for (int count = 0; count < timeOut; count++) {
+            for (int idleTime = 0; idleTime < timeOut; idleTime++) {
                 try {
                     if (in.available() > 0) {
                         while (in.available() > 0) {
@@ -144,7 +144,7 @@ public class Telnet {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                if (count == timeOut - 1) {
+                if (idleTime == timeOut - 1) {
                     return sb.toString();
                 }
             }

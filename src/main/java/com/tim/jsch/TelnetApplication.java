@@ -3,7 +3,7 @@ package com.tim.jsch;
 public class TelnetApplication {
 
 	public static void main(String[] args) {
-		com.tim.jsch.shell.Telnet telnet =  new com.tim.jsch.shell.Telnet("192.168.220.211", 23, "admin", "admin");
+		com.tim.jsch.shell.Telnet telnet =  new com.tim.jsch.shell.Telnet("192.168.220.211", 23, "admin", "admin", "telnetId");
 
 		telnet.sendCommand("s");
 		telnet.sendCommand("h");
