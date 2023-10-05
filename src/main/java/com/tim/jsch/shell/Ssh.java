@@ -10,7 +10,6 @@ import com.tim.jsch.struct.SshCacheItem;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,15 +44,13 @@ public class Ssh {
         this.sessionId = sessionId;
     }
 
-    public String execCommand(String cmd, int waitingTimes) {
+    public String execCommand(String cmd) {
 
-        // System.out.println("cmd: " + cmd);
-
+        System.out.println("\ncmd:" + cmd);
+        // disconnect ssh if command is disconnect
         if (cmd.compareTo("disconnect") == 0) {
-            // sessionCache.remove(host + username + password);
-            // sshCache.remove(sessionId);
             removeSshCacheItem(sessionId);
-            return "disconnect successfully";
+            return "Ssh disconnect successfully.";
         }
 
         // get ssh session
@@ -65,7 +62,7 @@ public class Ssh {
                 System.out.println("Session connect failed");
                 e.printStackTrace();
             }
-
+        sshCache.get(sessionId).getPq().add(System.currentTimeMillis());
         // get channel
         Channel channel = getChannel(session);
         if (!channel.isConnected())
@@ -100,9 +97,8 @@ public class Ssh {
         try {
             for (int i = 0; i < 1; i++) {
                 outputStream.write(cmd.getBytes());
-                //outputStream.write("\n".getBytes());
             }
-            System.out.println("Successfully write outputStream: " + cmd);
+            // System.out.println("Successfully write outputStream: " + cmd);
         } catch (IOException e) {
             System.out.println("channel write outputStream execption");
             e.printStackTrace();
@@ -122,68 +118,49 @@ public class Ssh {
             e.printStackTrace();
         }
 
-        byte[] tmp = new byte[1024];
-        ByteArrayOutputStream resultByteArray = new ByteArrayOutputStream();
-        int count = 0;
-        try {
-
-            // listen on inputStream for 2 times with a 0.6s sleep before every time
-            while (count < waitingTimes) {
+        StringBuffer sb = new StringBuffer();
+        int timeOut = 40;
+        while (true) {
+            for (int idleTime = 0; idleTime < timeOut; idleTime++) {
                 try {
-                    Thread.sleep(300);
-                } catch (Exception ee) {
-                    System.out.println("Thread Sleep execption");
+                    if (inputStream.available() > 0) {
+                        while (inputStream.available() > 0) {
+                            char ch = (char) inputStream.read();
+                            sb.append(ch);
+                        }
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(1);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                while (inputStream.available() > 0) {
-                    inputStream.read(tmp, 0, 1024);
-                    resultByteArray.write(tmp);
+                if (idleTime == timeOut - 1) {
+                    return sb.toString();
                 }
-                count++;
             }
-        } catch (IOException e) {
-            System.out.println("channel write inputStream execption");
-            e.printStackTrace();
         }
-
-        // checkStatus(session, channel);
-
-        /*
-        try {
-            inputStream.close();
-        } catch (IOException e) {
-            System.out.println("channel inputStream close execption");
-            e.printStackTrace();
-        }
-        try {
-            outputStream.close();
-        } catch (IOException e) {
-            System.out.println("channel outputStream close execption");
-            e.printStackTrace();
-        }
-        */
-        // channel.disconnect();
-        // session.disconnect();
-        byte result[] = resultByteArray.toByteArray();
-        return new String(result, 0, result.length);
     }
 
     public Session getSession() {
+        // System.out.println("Before get Session.");
         JSch jSch = new JSch();
         Session session = null;
 
-        // start session cache
         if (sshCache.get(sessionId) != null) {
             if (sshCache.get(sessionId).getSession().isConnected() == true) {
-                System.out.println("Session already exist and connect");
+                // System.out.println("Session already exist and connect");
+                // System.out.println("After get Session.");
                 return sshCache.get(sessionId).getSession();
             } else {
-                System.out.println("Session already exist but not connect");
-                // return sessionCache.get(host + username + password);
+                // System.out.println("Session already exist but not connect");
                 removeSshCacheItem(sessionId);
-                // sshCache.remove(host + username + password);
             }
         }
-        // end session cache
 
         try {
             session = jSch.getSession(username, host, port);
@@ -217,29 +194,27 @@ public class Ssh {
         SshCacheItem  item = new SshCacheItem();
         item.setSession(session);
         item.setConnectTime(System.currentTimeMillis());
+        // AutoDisconnectJob autoDisconnectJob = new AutoDisconnectJob(item);
+        // FutureTask<String> futureTask = new FutureTask<>(autoDisconnectJob);
+        // ExecutorService executor = Executors.newFixedThreadPool(10);
+        // executor.execute(futureTask);
         addSshCacheItem(sessionId, item);
-        // sshCache.get(host + username + password).setSession(session);
-        // end session cache
-
+        // System.out.println("After get Session.");
         return session;
     }
 
     public Channel getChannel(Session session) {
         Channel channel = null;
 
-        // start channel cache
         if (sshCache.get(sessionId).getChannel() != null) {
             if (sshCache.get(sessionId).getChannel().isConnected() == true) {
-                System.out.println("Channel already exist and connect");
+                // System.out.println("Channel already exist and connect");
                 return sshCache.get(sessionId).getChannel();
             } else {
-                System.out.println("Channel already exist but not connected");
-                // sshCache.get(host + username + password).getChannel().disconnect();
-                // return channelCache.get(host + username + password);
-                // sshCache.get(host + username + password).setChannel(null);
+                // System.out.println("Channel already exist but not connected");
+
             }
         }
-        // end channel cache
 
         try {
             channel = session.openChannel("shell");
@@ -247,14 +222,7 @@ public class Ssh {
             System.out.println("session open channel execption");
             e.printStackTrace();
         }
-
-        // start channel cache
-        // SshCacheItem item = new SshCacheItem();
-        // item.setChannel(channel);
-        // sshCache.put(host + username + password, item);
         sshCache.get(sessionId).setChannel(channel);
-        // end channel cache
-
         return channel;
     }
 
@@ -275,8 +243,6 @@ public class Ssh {
     }
 
     public void addSshCacheItem(String id, SshCacheItem sshCacheItem){
-        // System.out.println("--- in addSshCacheItem ---");
-        // System.out.println("origin sshcache size: " + sshCache.size());
         if(sshCache.size() < 20){
             sshCache.put(id, sshCacheItem);
             return;
@@ -293,12 +259,9 @@ public class Ssh {
         }
         removeSshCacheItem(maxId);
         sshCache.put(id, sshCacheItem);
-        // System.out.println("modify sshcache size: " + sshCache.size());
     }
 
-    private void removeSshCacheItem(String id) {
-        // System.out.println("--- in removeSshCacheItem ---");
-        // System.out.println("origin sshcache size: " + sshCache.size());
+    public void removeSshCacheItem(String id) {
         SshCacheItem connection = sshCache.get(id);
         if (connection == null) {
             return;
@@ -307,6 +270,5 @@ public class Ssh {
             connection.getSession().disconnect();
         }
         sshCache.remove(id);
-        // System.out.println("modify sshcache size: " + sshCache.size());
     }
 }

@@ -10,10 +10,8 @@ public class TelnetApplication {
 		telnet.sendCommand("o");
 		telnet.sendCommand("w");
 		telnet.sendCommand(" ");
-		String str6 = telnet.sendCommand("i");
-		telnet.sendCommand("p");
-		telnet.sendCommand("i");
-		telnet.sendCommand("f");
+		String str6 = telnet.sendCommand("s");
+		telnet.sendCommand("w");
 		String str10 = telnet.sendCommand("\r");
 		System.out.println("result1:\n" +str1 + "\nend result1");
 		System.out.println("result6:\n" + str6 + "\nend result6");

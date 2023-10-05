@@ -59,10 +59,10 @@ public class Telnet {
         System.out.println("--- start login ---");
         str += readUntil(loginPrompt);
         write(user);
-        write("\r");
+        write("\n");
         str += readUntil(passwordPrompt);
         write(password);
-        write("\r");
+        write("\r\n");
         str += readUntil(commandPrompt);
         System.out.println("--- login successfully ---");
         return str;
@@ -75,8 +75,10 @@ public class Telnet {
      */
     public void write(String value) {
         try {
-            ((PrintStream) out).print(value);
-            out.flush();
+            // ((PrintStream) out).print(value);
+            PrintStream telnetout = new PrintStream(out, false, "UTF-8");
+            telnetout.print(value);
+            telnetout.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -138,7 +140,7 @@ public class Telnet {
                 e.printStackTrace();
             }
             in = telnet.getInputStream();
-            out = new PrintStream(telnet.getOutputStream());
+            out = telnet.getOutputStream();
             str += login(user, password);
             TelnetCacheItem telnetCacheItem = new TelnetCacheItem();
             telnetCacheItem.setConnectTime(System.currentTimeMillis());
